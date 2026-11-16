@@ -1,0 +1,47 @@
+name: Auto-merge into dev
+
+# Điều kiện merge nằm trong .github/scripts/auto-merge.js:
+#   duyệt trên đúng commit hiện tại (status `ai-review` = success, hoặc 1 review APPROVED của người khác tác giả)
+#   + có ít nhất 1 check và tất cả xanh + không Changes requested + mergeable_state = clean.
+# Workflow dùng các event dưới đây chạy bằng file ở NHÁNH MẶC ĐỊNH của repo => nhánh mặc định phải là `dev`.
+
+on:
+  pull_request_review:
+    types: [submitted, dismissed]
+  status:
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  schedule:
+    - cron: "*/15 * * * *" # lưới an toàn nếu bỏ lỡ event
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+concurrency:
+  group: auto-merge
+  cancel-in-progress: false
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      # Chỉ checkout nhánh mặc định (chứa script), không bao giờ checkout code của PR.
+      - uses: actions/checkout@v4
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { run } = require("./.github/scripts/auto-merge.js")
+            await run({ github, context, core })
+
+# Cài đặt repo cần bật (một lần):
+# - Default branch = dev
+# - "Automatically delete head branches"
+# - Branch protection trên `dev`: bắt buộc status check `gate` (CI) và `ai-review`; KHÔNG bắt buộc review của người
+#   (nếu bắt buộc review native thì AI cần tài khoản khác tác giả để approve, xem docs/ai-workflow/ai-review.md)
