@@ -1,0 +1,49 @@
+name: Auto-merge into dev
+
+# Điều kiện merge nằm trong .github/scripts/auto-merge.js:
+#   status `ai-review` = success trên đúng commit hiện tại, do reviewer độc lập đặt
+#   + có ít nhất 1 check và tất cả xanh + không Changes requested + PR không tụt sau dev + mergeable_state = clean.
+#
+# Bảo mật: chỉ dùng event chạy bằng file workflow ở NHÁNH MẶC ĐỊNH (status, check_suite, workflow_run, schedule).
+# KHÔNG thêm pull_request / pull_request_review / pull_request_target: các event này chạy file từ ref của PR hoặc
+# cấp token ghi cho code của PR. Vì chạy từ nhánh mặc định, nhánh mặc định của repo phải là `dev`.
+
+on:
+  status:
+  check_suite:
+    types: [completed]
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+  schedule:
+    - cron: "*/15 * * * *" # lưới an toàn nếu bỏ lỡ event (vd. review Changes requested, dismiss)
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+  statuses: read
+
+concurrency:
+  group: auto-merge
+  cancel-in-progress: false
+
+jobs:
+  auto-merge:
+    runs-on: ubuntu-latest
+    steps:
+      # Chỉ checkout nhánh mặc định (chứa script), không bao giờ checkout code của PR.
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { run } = require("./.github/scripts/auto-merge.js")
+            await run({ github, context, core })
+
+# Cài đặt repo cần bật (một lần), chi tiết ở docs/ai-workflow/ai-review.md:
+# - Default branch = dev; "Automatically delete head branches"
+# - Branch protection trên `dev`: bắt buộc status check `gate`, `secrets`, `ai-review`; bật "Require branches to be up to date"
+# - Nếu được, giới hạn nguồn của check `ai-review` ở đúng tài khoản/GitHub App của reviewer
