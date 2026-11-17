@@ -1,0 +1,3 @@
+module.exports=[18622,(a,b,c)=>{b.exports=a.x("next/dist/compiled/next-server/app-page-turbo.runtime.prod.js",()=>require("next/dist/compiled/next-server/app-page-turbo.runtime.prod.js"))},17923,(a,b,c)=>{"use strict";b.exports=a.r(18622)},82457,(a,b,c)=>{"use strict";b.exports=a.r(17923).vendored["react-rsc"].ReactJsxRuntime},27572,a=>{"use strict";var b=a.i(82457);a.s(["default",0,function({children:a}){return(0,b.jsx)("html",{lang:"vi",children:(0,b.jsx)("body",{children:a})})},"metadata",0,{title:"Tra cứu phạt nguội",description:"Nhập biển số xe để kiểm tra phạt nguội."},"viewport",0,{width:"device-width",initialScale:1}])},50645,function(a){a.n(a.i(27572))}];
+
+//# sourceMappingURL=%5Broot-of-the-server%5D__06sssqqru4moh._.js.map
