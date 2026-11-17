@@ -1,12 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 import { describeError, ProviderError } from "./errors";
-import { createLiveProvider } from "./momo/live";
-import { mockResult } from "./momo/mock";
-import { parseCheckViolationResponse } from "./momo/parse";
+import { createLiveProvider } from "./upstream/live";
+import { mockResult } from "./upstream/mock";
+import { parseCheckViolationResponse } from "./upstream/parse";
 import { summarize } from "./summary";
 import type { ViolationResult } from "./types";
 
-// Mẫu rút gọn từ tài liệu MoMo (userCheckViolation).
+// Mẫu rút gọn từ tài liệu API (userCheckViolation).
 const sample = {
   statusCode: 200,
   error: null,
@@ -42,7 +42,7 @@ describe("parseCheckViolationResponse", () => {
     expect(r.records[0]).toMatchObject({ status: "Đã xử phạt", penalties: ["Khung phạt: 18.000.000–20.000.000 VNĐ", "Trừ điểm GPLX: 4"] });
   });
 
-  it("chuyển mã lỗi của MoMo thành ProviderError", () => {
+  it("chuyển mã lỗi của nguồn dữ liệu thành ProviderError", () => {
     expect(() => parseCheckViolationResponse(400, { statusCode: 400, error: "INVALID_PLATE_NUMBER" })).toThrow(expect.objectContaining({ code: "INVALID_PLATE_NUMBER" }));
     expect(() => parseCheckViolationResponse(401, { statusCode: 401, error: "Unauthorized" })).toThrow(expect.objectContaining({ code: "Unauthorized" }));
   });

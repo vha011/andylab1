@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, POST } from "./route";
 
-beforeEach(() => vi.stubEnv("MOMO_MODE", "mock"));
+beforeEach(() => vi.stubEnv("PHATNGUOI_MODE", "mock"));
 afterEach(() => vi.unstubAllEnvs());
 
 const post = (body: string) => POST(new Request("http://x/api/webhooks/events", { method: "POST", headers: { "content-type": "application/json" }, body }));
@@ -19,7 +19,7 @@ describe("/api/webhooks/events", () => {
   });
 
   it("ở live cả GET lẫn POST đều 404 (không lộ dữ liệu khách hàng)", async () => {
-    vi.stubEnv("MOMO_MODE", "live");
+    vi.stubEnv("PHATNGUOI_MODE", "live");
     expect(GET().status).toBe(404);
     expect((await post(JSON.stringify({ plate: "30A84812", vehicleType: 1 }))).status).toBe(404);
   });

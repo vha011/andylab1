@@ -1,7 +1,7 @@
 import { createHmac, randomBytes, timingSafeEqual } from "node:crypto";
 import { getMode, getWebhookCredentials, type WebhookCredentials } from "./config";
-import { parseRecords } from "./momo/parse";
-import { mockResult } from "./momo/mock";
+import { parseRecords } from "./upstream/parse";
+import { mockResult } from "./upstream/mock";
 import type { WebhookEvent } from "./types";
 
 const MAX_SKEW_MS = 5 * 60_000;
@@ -26,7 +26,7 @@ export function createNonceStore(now: () => number = Date.now): NonceStore {
   };
 }
 
-/** Chuỗi ký theo tài liệu MoMo: clientId|apiKey|timestamp|nonce. Body không tham gia ký. */
+/** Chuỗi ký theo tài liệu API: clientId|apiKey|timestamp|nonce. Body không tham gia ký. */
 export function sign(cred: WebhookCredentials, timestamp: string, nonce: string): string {
   return createHmac("sha256", cred.secretKey).update(`${cred.clientId}|${cred.apiKey}|${timestamp}|${nonce}`, "utf8").digest("hex");
 }
@@ -146,7 +146,7 @@ export async function simulateWebhook(plate: string, vehicleType: number, phone:
   const timestamp = String(Date.now());
   const nonce = randomBytes(16).toString("hex");
   return receiveWebhook(
-    new Request("http://internal/api/webhooks/momo", {
+    new Request("http://internal/api/webhooks/phat-nguoi", {
       method: "POST",
       headers: { "content-type": "application/json", timestamp, nonce, signature: sign(cred, timestamp, nonce) },
       body: JSON.stringify(body),

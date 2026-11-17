@@ -51,12 +51,12 @@ describe("receiveWebhook", () => {
   const mk = () => ({ events: [] as never[], nonces: createNonceStore() });
 
   function stubLive() {
-    vi.stubEnv("MOMO_MODE", "live");
-    vi.stubEnv("MOMO_WEBHOOK_CLIENT_ID", cred.clientId);
-    vi.stubEnv("MOMO_WEBHOOK_API_KEY", cred.apiKey);
-    vi.stubEnv("MOMO_WEBHOOK_SECRET", cred.secretKey);
+    vi.stubEnv("PHATNGUOI_MODE", "live");
+    vi.stubEnv("PHATNGUOI_WEBHOOK_CLIENT_ID", cred.clientId);
+    vi.stubEnv("PHATNGUOI_WEBHOOK_API_KEY", cred.apiKey);
+    vi.stubEnv("PHATNGUOI_WEBHOOK_SECRET", cred.secretKey);
   }
-  const post = (headers: Headers, payload: unknown = body) => new Request("http://x/api/webhooks/momo", { method: "POST", headers, body: typeof payload === "string" ? payload : JSON.stringify(payload) });
+  const post = (headers: Headers, payload: unknown = body) => new Request("http://x/api/webhooks/phat-nguoi", { method: "POST", headers, body: typeof payload === "string" ? payload : JSON.stringify(payload) });
   const now = () => String(Date.now());
 
   it("200 và lưu sự kiện khi hợp lệ; 401 khi ký sai", async () => {
@@ -80,7 +80,7 @@ describe("receiveWebhook", () => {
     expect((await receiveWebhook(post(hdrs({}, ts, "cccccccccccccccc")), s)).status).toBe(401);
   });
 
-  it("JSON hỏng hoặc sai cấu trúc là 400 (chữ ký đúng nên MoMo không cần retry)", async () => {
+  it("JSON hỏng hoặc sai cấu trúc là 400 (chữ ký đúng nên bên gửi không cần retry)", async () => {
     stubLive();
     const ts = now();
     expect((await receiveWebhook(post(hdrs({}, ts, "dddddddddddddddd"), "{not json"), mk())).status).toBe(400);
@@ -88,21 +88,21 @@ describe("receiveWebhook", () => {
   });
 
   it("live mà chưa cấu hình khóa: từ chối, không nhận request không ký", async () => {
-    vi.stubEnv("MOMO_MODE", "live");
-    vi.stubEnv("MOMO_WEBHOOK_SECRET", "");
+    vi.stubEnv("PHATNGUOI_MODE", "live");
+    vi.stubEnv("PHATNGUOI_WEBHOOK_SECRET", "");
     expect((await receiveWebhook(post(new Headers()), mk())).status).toBe(503);
   });
 
   it("simulate chạy end-to-end qua đúng đường xác thực ở mock, và bị tắt ở live", async () => {
-    vi.stubEnv("MOMO_MODE", "mock");
+    vi.stubEnv("PHATNGUOI_MODE", "mock");
     const res = await simulateWebhook("30A84812", 1, "0382716917");
     expect(res.status).toBe(200);
-    vi.stubEnv("MOMO_MODE", "live");
+    vi.stubEnv("PHATNGUOI_MODE", "live");
     expect((await simulateWebhook("30A84812", 1, "0382716917")).status).toBe(404);
   });
 
   it("simulate không biến lỗi tra cứu thành callback 'không có lỗi vi phạm'", async () => {
-    vi.stubEnv("MOMO_MODE", "mock");
+    vi.stubEnv("PHATNGUOI_MODE", "mock");
     const before = store().events.length;
     for (const plate of ["88A00000", "99X99999"]) expect((await simulateWebhook(plate, 1, "0382716917")).status).toBe(409);
     expect(store().events.length).toBe(before);

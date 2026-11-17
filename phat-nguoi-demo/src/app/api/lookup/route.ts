@@ -4,7 +4,7 @@ import { getProvider } from "@/lib/config";
 import { isValidPlate, isVehicleType, normalizePlate } from "@/lib/plate";
 import type { LookupResponse } from "@/lib/types";
 
-// Mỗi lượt tra cứu live tốn quota của MoMo nên giới hạn theo IP, kèm trần chung để IP giả mạo cũng không đốt hết quota.
+// Mỗi lượt tra cứu live tốn quota của nguồn dữ liệu nên giới hạn theo IP, kèm trần chung để IP giả mạo cũng không đốt hết quota.
 const limiter = createRateLimiter(8, 60_000);
 const globalLimiter = createRateLimiter(120, 60_000);
 

@@ -1,7 +1,7 @@
 import { ProviderError } from "../errors";
 import type { CriminalRecord, LookupInput, ViolationProvider, ViolationResult } from "../types";
 
-// Dữ liệu mô phỏng, KHÔNG phải kết quả thật. Nội dung lấy theo ví dụ trong tài liệu MoMo.
+// Dữ liệu mô phỏng, KHÔNG phải kết quả thật. Nội dung lấy theo ví dụ trong tài liệu API.
 const POOL: Omit<CriminalRecord, "plate" | "status">[] = [
   {
     content: "Điều khiển xe chạy quá tốc độ quy định từ 05 km/h đến dưới 10 km/h",

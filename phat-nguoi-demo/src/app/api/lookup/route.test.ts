@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { POST } from "./route";
 
-beforeEach(() => vi.stubEnv("MOMO_MOCK_DELAY_MS", "0"));
+beforeEach(() => vi.stubEnv("PHATNGUOI_MOCK_DELAY_MS", "0"));
 afterEach(() => vi.unstubAllEnvs());
 
 let n = 0;
@@ -47,11 +47,11 @@ describe("POST /api/lookup (mock)", () => {
   });
 
   it("live thiếu cấu hình: lỗi 500 gọn, không lộ biến môi trường", async () => {
-    vi.stubEnv("MOMO_MODE", "live");
-    vi.stubEnv("MOMO_BASE_URL", "");
-    vi.stubEnv("MOMO_API_KEY", "");
+    vi.stubEnv("PHATNGUOI_MODE", "live");
+    vi.stubEnv("PHATNGUOI_BASE_URL", "");
+    vi.stubEnv("PHATNGUOI_API_KEY", "");
     const res = await call({ plate: "51F12345", vehicleType: 1 });
     expect(res.status).toBe(500);
-    expect(JSON.stringify(await res.json())).not.toMatch(/MOMO_|http/);
+    expect(JSON.stringify(await res.json())).not.toMatch(/PHATNGUOI_|http/);
   });
 });

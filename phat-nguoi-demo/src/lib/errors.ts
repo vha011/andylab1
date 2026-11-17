@@ -14,7 +14,7 @@ interface ErrorInfo {
   httpStatus: number;
 }
 
-// Mã lỗi theo tài liệu API tra cứu phạt nguội của MoMo. Không lộ chi tiết nội bộ ra client.
+// Mã lỗi theo tài liệu API tra cứu phạt nguội. Không lộ chi tiết nội bộ ra client.
 const ERRORS: Record<string, ErrorInfo> = {
   INVALID_PLATE_NUMBER: { message: "Biển số xe không hợp lệ. Kiểm tra lại biển số và loại xe.", retryable: false, httpStatus: 400 },
   RETRY_AGAIN_LATER: { message: "Hệ thống đang bận, vui lòng thử lại sau ít phút.", retryable: true, httpStatus: 503 },

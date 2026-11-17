@@ -45,11 +45,11 @@ export function WebhookPanel({ plate, vehicleType }: { plate: string; vehicleTyp
     <section className="card" aria-labelledby="wh-title">
       <h2 id="wh-title">Thông báo định kỳ (webhook)</h2>
       <p className="muted">
-        Sau khi người dùng đăng ký dịch vụ, MoMo gọi <code>POST /api/webhooks/momo</code> mỗi khi có thay đổi. Server kiểm chữ ký HMAC-SHA256, giới hạn lệch giờ 5 phút và chặn dùng lại nonce.
+        Sau khi người dùng đăng ký dịch vụ, nguồn dữ liệu gọi <code>POST /api/webhooks/phat-nguoi</code> mỗi khi có thay đổi. Server kiểm chữ ký HMAC-SHA256, giới hạn lệch giờ 5 phút và chặn dùng lại nonce.
       </p>
       <div className="row">
         <button className="btn btn-secondary" type="button" onClick={() => void simulate()} disabled={!ok || busy}>
-          {busy ? "Đang gửi…" : ok ? `Mô phỏng MoMo gửi thông báo cho ${formatPlate(n)}` : "Nhập biển số hợp lệ để mô phỏng"}
+          {busy ? "Đang gửi…" : ok ? `Mô phỏng nguồn dữ liệu gửi thông báo cho ${formatPlate(n)}` : "Nhập biển số hợp lệ để mô phỏng"}
         </button>
         <button className="link" type="button" onClick={() => void refresh()}>
           Làm mới

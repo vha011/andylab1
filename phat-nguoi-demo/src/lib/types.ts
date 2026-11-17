@@ -1,4 +1,4 @@
-/** Kiểu theo tài liệu API userCheckViolation và callback CustomerCriminalRecord của MoMo. */
+/** Kiểu theo tài liệu API userCheckViolation và callback CustomerCriminalRecord của bên cung cấp API. */
 
 export type RecordStatus = "Chưa xử phạt" | "Đã xử phạt" | "Không vi phạm" | "Lỗi tra cứu" | string;
 

@@ -9,7 +9,7 @@ export interface Summary {
 }
 
 /**
- * Cờ hasCriminal không đủ để kết luận: tài liệu MoMo có mẫu hasCriminal=0 nhưng vẫn kèm bản ghi "Đã xử phạt".
+ * Cờ hasCriminal không đủ để kết luận: tài liệu API có mẫu hasCriminal=0 nhưng vẫn kèm bản ghi "Đã xử phạt".
  * Nên dựa vào trạng thái từng bản ghi. Trạng thái không nhận ra (kể cả "Lỗi tra cứu") là KHÔNG xác định,
  * tuyệt đối không được coi là sạch: nếu không có lỗi chưa xử phạt thì báo lỗi tra cứu.
  */

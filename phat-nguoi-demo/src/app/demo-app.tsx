@@ -17,7 +17,7 @@ export function DemoApp({ mode }: { mode: "mock" | "live" }) {
 
       {mode === "mock" && (
         <div className="banner banner-demo" role="note">
-          <strong>Dữ liệu mô phỏng.</strong> Chưa kết nối API MoMo, kết quả bên dưới không phải dữ liệu thật của biển số bạn nhập.
+          <strong>Dữ liệu mô phỏng.</strong> Chưa kết nối API tra cứu thật, kết quả bên dưới không phải dữ liệu thật của biển số bạn nhập.
         </div>
       )}
 
