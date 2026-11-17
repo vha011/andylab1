@@ -55,3 +55,11 @@ Giới hạn của bản demo:
 ## Lưu ý dữ liệu
 
 Biển số và vi phạm là dữ liệu cá nhân. App không lưu kết quả tra cứu và chỉ ghi log mã lỗi, không ghi biển số. Kết quả mang tính tham khảo.
+
+## Giới hạn tần suất
+
+Mỗi lượt tra cứu live tốn quota của MoMo nên `/api/lookup` giới hạn 8 lượt/phút/IP và 120 lượt/phút toàn app. IP lấy từ `x-forwarded-for` theo `TRUSTED_PROXY_HOPS` (số proxy tin cậy phía trước, mặc định 1); đặt sai số này sẽ làm IP bị giả mạo hoặc mọi người dùng chung một nhóm. Bộ đếm lưu trong bộ nhớ nên nhiều instance cần bộ đếm chung (Redis).
+
+## Hiển thị biển số
+
+Định dạng `30A-848.12` chỉ để hiển thị và là suy đoán theo loại xe đã chọn (xe máy 5 số sau seri hiểu là `59C1-1234`); dữ liệu gửi đi luôn là chuỗi đã chuẩn hóa, không bị ảnh hưởng.

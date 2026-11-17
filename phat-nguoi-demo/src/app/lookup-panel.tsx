@@ -77,7 +77,7 @@ export function LookupPanel({ mode, plate, onPlate, vehicleType, onVehicleType }
           {showInvalid
             ? "Biển số chưa đúng định dạng. Ví dụ: 30A-848.12, 51F-123.45, 59C1-123.45."
             : valid
-              ? `Sẽ tra cứu: ${formatPlate(normalized)}`
+              ? `Sẽ tra cứu: ${formatPlate(normalized, vehicleType)}`
               : "Có thể nhập có hoặc không có dấu gạch, dấu chấm, dấu cách."}
         </p>
 
@@ -137,7 +137,7 @@ export function LookupPanel({ mode, plate, onPlate, vehicleType, onVehicleType }
 
 function Result({ result }: { result: ViolationResult }) {
   const s = summarize(result);
-  const title = formatPlate(normalizePlate(result.plate));
+  const title = formatPlate(normalizePlate(result.plate), result.vehicleType);
 
   if (s.kind === "error") {
     return (
@@ -147,9 +147,12 @@ function Result({ result }: { result: ViolationResult }) {
     );
   }
 
+  const count = s.pending || result.records.length;
   const headline =
     s.kind === "pending"
-      ? `Có ${s.pending || result.records.length} vi phạm chưa xử phạt`
+      ? count > 0
+        ? `Có ${count} vi phạm chưa xử phạt`
+        : "Có vi phạm chưa xử phạt"
       : s.kind === "history"
         ? "Không còn lỗi chưa xử phạt"
         : "Không phát hiện vi phạm";

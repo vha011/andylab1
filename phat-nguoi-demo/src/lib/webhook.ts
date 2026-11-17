@@ -58,6 +58,12 @@ export function parseWebhookPayload(payload: unknown, receivedAt: string, id: st
   const customer = (cd.customerData ?? {}) as Record<string, unknown>;
   const s = (v: unknown) => (typeof v === "string" ? v : "");
   const n = (v: unknown) => (typeof v === "number" ? v : 0);
+  let records;
+  try {
+    records = parseRecords(cd.criminalRecords);
+  } catch {
+    return null;
+  }
   return {
     id,
     receivedAt,
@@ -66,7 +72,7 @@ export function parseWebhookPayload(payload: unknown, receivedAt: string, id: st
     refreshDate: s(cd.refreshDate),
     customerIdentifier: s(customer.customerIdentifier),
     plate: s(vehicle.vehicleIdentity),
-    records: parseRecords(cd.criminalRecords),
+    records,
   };
 }
 
@@ -107,12 +113,14 @@ export async function simulateWebhook(plate: string, vehicleType: number, phone:
   const cred = getWebhookCredentials();
   if (!cred) return json({ ok: false }, 503);
 
+  // Lookup lỗi thì không có thông báo thật nào để phát: không được đổi lỗi thành callback "không có lỗi vi phạm".
   let result;
   try {
     result = mockResult(plate, vehicleType);
   } catch {
-    result = { plate, plateColor: "WHITE", vehicleType, hasCriminal: 0 as const, records: [] };
+    return json({ ok: false, error: "lookup_failed" }, 409);
   }
+  if (result.hasCriminal === 2) return json({ ok: false, error: "lookup_failed" }, 409);
   const pending = result.records.filter((r) => r.status === "Chưa xử phạt");
   const body = {
     callbackData: {

@@ -24,8 +24,13 @@ export function parseRecord(raw: unknown): CriminalRecord | null {
 }
 
 export function parseRecords(raw: unknown): CriminalRecord[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.map(parseRecord).filter((r): r is CriminalRecord => r !== null);
+  if (raw === undefined || raw === null) return [];
+  if (!Array.isArray(raw)) throw new ProviderError("UNKNOWN_ERROR");
+  return raw.map((r) => {
+    const rec = parseRecord(r);
+    if (!rec) throw new ProviderError("UNKNOWN_ERROR");
+    return rec;
+  });
 }
 
 /** Phân tích phản hồi userCheckViolation. Ném ProviderError nếu là lỗi hoặc sai định dạng. */

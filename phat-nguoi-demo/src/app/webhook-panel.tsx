@@ -28,7 +28,13 @@ export function WebhookPanel({ plate, vehicleType }: { plate: string; vehicleTyp
     setNote("");
     try {
       const res = await fetch("/api/webhooks/events", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ plate: n, vehicleType }) });
-      setNote(res.ok ? "Đã nhận callback và xác thực chữ ký thành công." : `Callback bị từ chối (HTTP ${res.status}).`);
+      setNote(
+        res.ok
+          ? "Đã nhận callback và xác thực chữ ký thành công."
+          : res.status === 409
+            ? "Biển này đang mô phỏng lỗi tra cứu nên không có thông báo nào được gửi."
+            : `Callback bị từ chối (HTTP ${res.status}).`,
+      );
       await refresh();
     } finally {
       setBusy(false);
