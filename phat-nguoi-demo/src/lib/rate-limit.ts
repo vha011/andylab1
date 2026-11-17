@@ -17,6 +17,13 @@ export function createRateLimiter(limit: number, windowMs: number, now: () => nu
   };
 }
 
-export function clientIp(headers: Headers): string {
-  return headers.get("x-forwarded-for")?.split(",")[0]?.trim() || headers.get("x-real-ip") || "unknown";
+/**
+ * IP khách theo số proxy tin cậy phía trước app (TRUSTED_PROXY_HOPS, mặc định 1).
+ * Mỗi proxy tin cậy nối thêm IP vào cuối x-forwarded-for, nên lấy mục thứ `hops` tính từ cuối;
+ * phần client tự chèn nằm bên trái và bị bỏ qua. Không đọc x-real-ip vì client giả mạo được.
+ * Thiếu header thì gom chung một nhóm "unknown": giới hạn chặt hơn chứ không để lọt.
+ */
+export function clientIp(headers: Headers, hops: number = Number(process.env.TRUSTED_PROXY_HOPS ?? 1) || 1): string {
+  const chain = (headers.get("x-forwarded-for") ?? "").split(",").map((s) => s.trim()).filter(Boolean);
+  return chain[chain.length - hops] ?? "unknown";
 }

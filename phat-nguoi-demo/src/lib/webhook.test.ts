@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createNonceStore, receiveWebhook, sign, simulateWebhook, verifyWebhook } from "./webhook";
-import { createRateLimiter } from "./rate-limit";
+import { createNonceStore, receiveWebhook, sign, simulateWebhook, store, verifyWebhook } from "./webhook";
+import { clientIp, createRateLimiter } from "./rate-limit";
 import type { WebhookCredentials } from "./config";
 
 const cred: WebhookCredentials = { clientId: "c1", apiKey: "a1", secretKey: "s1" };
@@ -99,6 +99,32 @@ describe("receiveWebhook", () => {
     expect(res.status).toBe(200);
     vi.stubEnv("MOMO_MODE", "live");
     expect((await simulateWebhook("30A84812", 1, "0382716917")).status).toBe(404);
+  });
+
+  it("simulate không biến lỗi tra cứu thành callback 'không có lỗi vi phạm'", async () => {
+    vi.stubEnv("MOMO_MODE", "mock");
+    const before = store().events.length;
+    for (const plate of ["88A00000", "99X99999"]) expect((await simulateWebhook(plate, 1, "0382716917")).status).toBe(409);
+    expect(store().events.length).toBe(before);
+  });
+
+  it("bản ghi hỏng trong callback là 400, không phải 500", async () => {
+    stubLive();
+    const bad = { callbackData: { ...body.callbackData, criminalRecords: "hỏng" } };
+    expect((await receiveWebhook(post(hdrs({}, now(), "ffffffffffffffff"), bad), mk())).status).toBe(400);
+  });
+});
+
+describe("clientIp", () => {
+  const h = (xff?: string, extra: Record<string, string> = {}) => new Headers({ ...(xff ? { "x-forwarded-for": xff } : {}), ...extra });
+  it("lấy IP do proxy tin cậy nối vào cuối, bỏ qua phần client tự chèn", () => {
+    expect(clientIp(h("1.1.1.1, 2.2.2.2, 9.9.9.9"), 1)).toBe("9.9.9.9");
+    expect(clientIp(h("6.6.6.6, 9.9.9.9"), 1)).toBe(clientIp(h("7.7.7.7, 9.9.9.9"), 1));
+    expect(clientIp(h("1.1.1.1, 2.2.2.2, 9.9.9.9"), 2)).toBe("2.2.2.2");
+  });
+  it("không tin x-real-ip; thiếu header thì gom nhóm chung", () => {
+    expect(clientIp(h(undefined, { "x-real-ip": "5.5.5.5" }), 1)).toBe("unknown");
+    expect(clientIp(h("9.9.9.9"), 3)).toBe("unknown");
   });
 });
 

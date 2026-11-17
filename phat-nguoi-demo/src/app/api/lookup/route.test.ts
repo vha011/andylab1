@@ -18,10 +18,17 @@ describe("POST /api/lookup (mock)", () => {
     expect(body.result.records).toHaveLength(2);
   });
 
-  it.each([{}, { plate: 123, vehicleType: 1 }, { plate: "30A84812" }, { plate: "30A84812", vehicleType: 7 }, { plate: "abc", vehicleType: 1 }, "{hỏng"])("đầu vào sai %j là 400", async (b) => {
+  it.each([{}, { plate: 123, vehicleType: 1 }, { plate: "30A84812" }, { plate: "30A84812", vehicleType: 7 }, { plate: "abc", vehicleType: 1 }, "{hỏng", "null", "123", '"abc"', "[]"])("đầu vào sai %j là 400", async (b) => {
     const res = await call(b);
     expect(res.status).toBe(400);
     expect((await res.json()).error.code).toBe("INVALID_PLATE_NUMBER");
+  });
+
+  it("giả mạo đầu x-forwarded-for không vượt được giới hạn theo IP", async () => {
+    const codes: number[] = [];
+    for (let i = 0; i < 10; i++) codes.push((await call({ plate: "51F12345", vehicleType: 1 }, `66.66.66.${i}, 198.51.100.7`)).status);
+    expect(codes.filter((c) => c === 200)).toHaveLength(8);
+    expect(codes.slice(8)).toEqual([429, 429]);
   });
 
   it("lỗi nguồn được map sang thông báo tiếng Việt, mã trạng thái phù hợp", async () => {

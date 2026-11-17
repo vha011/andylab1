@@ -53,11 +53,18 @@ describe("parseCheckViolationResponse", () => {
     }
   });
 
-  it("hasCriminal lạ coi là lỗi (2), bản ghi hỏng bị bỏ qua", () => {
-    const r = parseCheckViolationResponse(200, { data: { hasCriminal: 9, criminalRecords: [null, 3, { crimeRecordContent: "ok" }] } });
-    expect(r.hasCriminal).toBe(2);
-    expect(r.records).toHaveLength(1);
-    expect(r.records[0]?.status).toBe("Lỗi tra cứu");
+  it("hasCriminal lạ coi là lỗi (2); thiếu danh sách bản ghi coi là rỗng", () => {
+    expect(parseCheckViolationResponse(200, { data: { hasCriminal: 9 } })).toMatchObject({ hasCriminal: 2, records: [] });
+  });
+
+  it("danh sách bản ghi hỏng thì lỗi, không âm thầm thành rỗng (tránh báo sạch nhầm)", () => {
+    for (const criminalRecords of ["x", { a: 1 }, [null], [3], [{ crimeRecordContent: "ok" }, "bad"]]) {
+      expect(() => parseCheckViolationResponse(200, { data: { hasCriminal: 0, criminalRecords } })).toThrow(expect.objectContaining({ code: "UNKNOWN_ERROR" }));
+    }
+  });
+
+  it("bản ghi thiếu trạng thái nhận trạng thái 'Lỗi tra cứu'", () => {
+    expect(parseCheckViolationResponse(200, { data: { hasCriminal: 0, criminalRecords: [{ crimeRecordContent: "ok" }] } }).records[0]?.status).toBe("Lỗi tra cứu");
   });
 });
 
@@ -75,6 +82,18 @@ describe("summarize", () => {
     expect(summarize({ ...base, hasCriminal: 2 }).kind).toBe("error");
   });
   it("không có gì là clear", () => expect(summarize(base).kind).toBe("clear"));
+
+  it("trạng thái không nhận ra hoặc 'Lỗi tra cứu' không bao giờ là clear/history", () => {
+    expect(summarize({ ...base, records: [rec("Lỗi tra cứu")] }).kind).toBe("error");
+    expect(summarize({ ...base, records: [rec("")] }).kind).toBe("error");
+    expect(summarize({ ...base, records: [rec("Đã xử phạt"), rec("Trạng thái mới")] }).kind).toBe("error");
+  });
+  it("có lỗi chưa xử phạt thì ưu tiên báo vi phạm dù có bản ghi lỗi khác", () => {
+    expect(summarize({ ...base, records: [rec("Chưa xử phạt"), rec("Lỗi tra cứu")] }).kind).toBe("pending");
+  });
+  it("hasCriminal=1 mà không có bản ghi vẫn báo có vi phạm", () => {
+    expect(summarize({ ...base, hasCriminal: 1 }).kind).toBe("pending");
+  });
 });
 
 describe("mock", () => {

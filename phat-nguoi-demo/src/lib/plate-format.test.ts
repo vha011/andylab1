@@ -18,6 +18,13 @@ describe("plate", () => {
     expect(formatPlate("59C112345")).toBe("59C1-123.45");
     expect(formatPlate("không hợp lệ")).toBe("không hợp lệ");
   });
+
+  it("xe máy 5 số sau seri: số đầu thuộc seri, ô tô thì không", () => {
+    expect(formatPlate("59C11234", 30)).toBe("59C1-1234");
+    expect(formatPlate("59C11234", 40)).toBe("59C1-1234");
+    expect(formatPlate("59C11234", 1)).toBe("59C-112.34");
+    expect(formatPlate("30A84812", 30)).toBe("30A8-4812");
+  });
 });
 
 describe("format", () => {

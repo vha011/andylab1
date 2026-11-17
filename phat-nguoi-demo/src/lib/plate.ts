@@ -30,13 +30,18 @@ export function isValidPlate(normalized: string): boolean {
   return Number(m[1]) >= 11;
 }
 
-/** 30A84812 → 30A-848.12 ; 59C112345 → 59C1-123.45. Chỉ để hiển thị. */
-export function formatPlate(normalized: string): string {
+/**
+ * 30A84812 → 30A-848.12 ; 59C112345 → 59C1-123.45. Chỉ để hiển thị.
+ * Ô tô 5 số sau seri là số xe (30A-848.12); xe máy/xe điện 5 số thì số đầu thuộc seri (59C1-1234).
+ */
+export function formatPlate(normalized: string, vehicleType: number = 1): string {
   const m = PLATE_RE.exec(normalized);
   if (!m) return normalized;
   const [, province, letters, digits] = m as unknown as [string, string, string, string];
-  const seriesDigit = digits.length === 6 ? digits.slice(0, 1) : "";
-  const number = digits.length === 6 ? digits.slice(1) : digits;
+  const bike = vehicleType === 30 || vehicleType === 40;
+  const hasSeriesDigit = digits.length === 6 || (bike && digits.length === 5);
+  const seriesDigit = hasSeriesDigit ? digits.slice(0, 1) : "";
+  const number = hasSeriesDigit ? digits.slice(1) : digits;
   const body = number.length === 5 ? `${number.slice(0, 3)}.${number.slice(3)}` : number;
   return `${province}${letters}${seriesDigit}-${body}`;
 }
